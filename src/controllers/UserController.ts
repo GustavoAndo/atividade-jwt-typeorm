@@ -112,6 +112,26 @@ class UserController {
     }
   }
 
+  
+  public async delete(req: Request, res: Response): Promise<Response> {
+    const { iduser } = req.body;
+
+    if( !iduser || iduser.trim() === "" ){
+      return res.json({error:"Forneça o identificador do usuário"});
+    }
+
+    const user = await AppDataSource.manager.findOneBy(User, { iduser: Number(iduser) }).catch((e) => e.message);
+
+    if (user && user.iduser) {
+      const userDeleted = await AppDataSource.manager.remove(User, user).catch((e) => e.message)
+      return res.json(userDeleted)
+    }
+    else {
+      return res.json({ error: "Usuário não localizado" })
+    }
+  }
+
+
 }
 
 export default new UserController();
