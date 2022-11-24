@@ -57,7 +57,61 @@ class UserController {
     
       return res.json(resp);
   }
-  
+
+
+  public async update(req: Request, res: Response): Promise<Response> {
+    const { iduser, name, mail, idmaster, profile, departments } = req.body;
+
+    if( !iduser ){
+      return res.json({error:"Forneça o identificador do usuário"});
+    }
+
+    const user = await AppDataSource.manager.findOneBy(User, { iduser }).catch((e) => e.message);
+
+    if (user && user.iduser) {
+      user.name = !name || name.trim() === '' ? user.name : name.trim();
+      user.mail = !mail || mail.trim() === '' ? user.mail : mail.trim();
+      user.profile = !profile || profile.trim() === '' ? user.profile : profile.trim();
+
+      if(idmaster == iduser){
+        return res.json({error:"O usuário não pode ser gestor de si mesmo"});
+      }
+
+      if(idmaster){
+        const master = await AppDataSource.manager.findOneBy(User, { iduser:idmaster });
+        if( !master || !master.iduser ){
+          return res.json({ error: "Gestor não localizado" });
+        }
+        if( master.profile !== "manager"){
+          return res.json({ error: "O usuário fornecido não possui perfil de gestor" });
+        }
+        user.master = master;
+      }
+
+      if (departments) {
+        departments.forEach((async(d) => {
+          const department = await AppDataSource.manager.findOneBy(Department, { iddepartment: d.iddepartment })
+
+          if( !department || !department.iddepartment ){
+            return res.json({ error: "Departamento não localizado" });
+          }
+
+        }))
+
+        user.departments = departments
+      }
+
+      const newUser = await AppDataSource.manager.save(User, user).catch((e) => {
+        return e.message;
+      })
+
+      return res.json(newUser);
+    }
+    else {
+      return res.json({ error: "Usuário não localizado" })
+    }
+  }
+
 }
 
 export default new UserController();
