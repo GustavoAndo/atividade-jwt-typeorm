@@ -132,6 +132,38 @@ class UserController {
   }
 
 
+  public async list(req: Request, res: Response): Promise<Response> {
+    let { profile, department } = req.params;
+    const _profile = profile as Profile;
+
+    if (profile !== 'employee' && profile !== 'manager' && profile !== 'admin'){
+      return res.json({ error: "Valor inválido para perfil. Forneça employee, manager ou admin"})
+    }
+
+    if (department === 'false' || department === 'true') {
+      if (department === 'false') {
+        department = ""
+      } 
+    } else {
+      return res.json({ error: "Valor inválido para departamento. Forneça true ou false"})
+    }
+
+    const users = await AppDataSource.getRepository(User).find({
+      where: {
+        profile: _profile,
+      },
+      relations: {
+        departments: Boolean(department)
+      },
+      order: {
+        name: 'asc'
+      }
+    });
+
+    return res.json(users);
+  }
+
+
 }
 
 export default new UserController();
