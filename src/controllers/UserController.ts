@@ -1,5 +1,4 @@
 import { Request, Response } from 'express';
-import { ArrayOverlap } from 'typeorm';
 import AppDataSource from '../data-source';
 import Department from '../entities/Department';
 import User, { Profile } from "../entities/User"
