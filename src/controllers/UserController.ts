@@ -48,6 +48,12 @@ class UserController {
           return res.json({ error: "Forneça a senha do usuário" });
       }
 
+      const validateMail = await AppDataSource.manager.findOneBy(User, { mail })
+
+      if (validateMail) {
+          return res.json({error: "O email fornecido já está em uso"})
+      } 
+
       const user = new User();
       user.name = name.trim();
       user.mail = mail.trim();
@@ -68,29 +74,32 @@ class UserController {
       }
 
       if (departments) {
-          departments.forEach((async(d) => {
-            const department = await AppDataSource.manager.findOneBy(Department, { iddepartment: d.iddepartment })
+        const allDepartments = []
 
-            if( !department || !department.iddepartment ){
-              return res.json({ error: "Departamento não localizado" });
-            }
+        departments.forEach((async (d: number) => {
+          const department = await AppDataSource.manager.findOneBy(Department, { iddepartment: d })
 
-          }))
+          if( !department || !department.iddepartment ){
+            return res.json({ error: "Departamento não localizado" });
+          }
 
-          user.departments = departments
+          allDepartments.push(department)
+        }))
+
+        user.departments = allDepartments
       }
 
-      const resp: any = await AppDataSource.manager.save(User, user).catch((e) => {
-          return { error: e.message }
+      const newUser = await AppDataSource.manager.save(User, user).catch((e) => {
+        return e.message;
       })
-    
-      return res.json(resp);
+
+      return res.json(newUser);
   }
 
 
   public async update(req: Request, res: Response): Promise<Response> {
     const { iduser, name, mail, idmaster, profile, departments } = req.body;
-
+    
     if( !iduser ){
       return res.json({error:"Forneça o identificador do usuário"});
     }
@@ -99,6 +108,17 @@ class UserController {
 
     if (user && user.iduser) {
       user.name = !name || name.trim() === '' ? user.name : name.trim();
+
+      let validateMail = undefined
+      
+      if (mail) {
+        validateMail = await AppDataSource.manager.findOneBy(User, { mail }) 
+      }
+
+      if (validateMail && user.mail !== validateMail.mail) {
+          return res.json({error: "O email fornecido já está em uso"})
+      } 
+
       user.mail = !mail || mail.trim() === '' ? user.mail : mail.trim();
       user.profile = !profile || profile.trim() === '' ? user.profile : profile.trim();
 
@@ -118,16 +138,19 @@ class UserController {
       }
 
       if (departments) {
-        departments.forEach((async(d) => {
-          const department = await AppDataSource.manager.findOneBy(Department, { iddepartment: d.iddepartment })
+        const allDepartments = []
+
+        departments.forEach((async (d: number) => {
+          const department = await AppDataSource.manager.findOneBy(Department, { iddepartment: d })
 
           if( !department || !department.iddepartment ){
             return res.json({ error: "Departamento não localizado" });
           }
 
+          allDepartments.push(department)
         }))
 
-        user.departments = departments
+        user.departments = allDepartments
       }
 
       const newUser = await AppDataSource.manager.save(User, user).catch((e) => {
@@ -145,7 +168,7 @@ class UserController {
   public async delete(req: Request, res: Response): Promise<Response> {
     const { iduser } = req.body;
 
-    if( !iduser || iduser.trim() === "" ){
+    if( !iduser ){
       return res.json({error:"Forneça o identificador do usuário"});
     }
 

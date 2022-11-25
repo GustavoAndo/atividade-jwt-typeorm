@@ -14,11 +14,11 @@ class DepartmentController {
         const department = new Department();
         department.name = name.trim();
 
-        const resp: any = await AppDataSource.manager.save(Department, department).catch((e) => {
+        const newDepartament = await AppDataSource.manager.save(Department, department).catch((e) => {
             return { error: e.message }
         })
       
-        return res.json(resp);
+        return res.json(newDepartament);
     }
     
     
