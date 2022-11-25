@@ -193,6 +193,27 @@ class UserController {
   }
 
 
+  public async updatePassword(req: Request, res: Response): Promise<Response> {
+    const { password } = req.body;
+    const { id } = res.locals;
+
+    if (!password || password.trim().length == 0) {
+      return res.json({ error: "Forneça a nova senha" });
+    }
+
+    const user = await AppDataSource.manager.findOneBy(User, { iduser:id });
+
+    if (user && user.iduser) {
+      user.password = password.trim();
+
+      const newUser = await AppDataSource.manager.save(User, user);
+      return res.json(newUser);
+    }
+    else {
+      return res.json({ error: "Colaborador não localizado" })
+    }
+  }
+
 }
 
 export default new UserController();
