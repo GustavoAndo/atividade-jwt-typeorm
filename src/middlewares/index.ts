@@ -22,3 +22,25 @@ export const authorization = async (req: Request, res: Response, next: NextFunct
     
     return next();
 };
+
+export const authManager = async (req: Request, res: Response, next: NextFunction) => {
+    const {perfil} = res.locals;
+
+    if( perfil !== 'manager' ){
+        res.status(401).send({error:"Sem autorização de gestor para acessar o recurso"});
+        return;
+    }
+    
+    return next();
+};
+
+export const authAdmin = async (req: Request, res: Response, next: NextFunction) => {
+    const {perfil} = res.locals;
+
+    if( perfil !== 'admin' ){
+        res.status(401).send({error:"Sem autorização de administrador para acessar o recurso"});
+        return;
+    }
+
+    return next();
+};
