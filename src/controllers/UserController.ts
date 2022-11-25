@@ -2,8 +2,38 @@ import { Request, Response } from 'express';
 import AppDataSource from '../data-source';
 import Department from '../entities/Department';
 import User, { Profile } from "../entities/User"
+import { generateToken } from '../middlewares';
 
 class UserController {
+
+  public async login(req: Request, res: Response): Promise<Response> {
+    const { mail, password } = req.body;
+
+    const user = await AppDataSource
+      .getRepository(User)
+      .createQueryBuilder("user")
+      .select()
+      .addSelect('user.password')
+      .where("user.mail=:mail", { mail })
+      .getOne();
+
+    if (user && user.iduser) {
+      const r = await user.compare(password);
+      if (r) {
+        const token = await generateToken({ id: user.iduser, perfil: user.profile })
+        return res.json({
+          name: user.name,
+          profile: user.profile,
+          token
+        })
+      }
+      return res.json({ error: "Dados de login não conferem" });
+    }
+    else {
+      return res.json({ error: "Usuário não localizado" });
+    }
+  }
+
 
   public async create(req: Request, res: Response) {
       const { name, mail, password, idmaster, profile, departments } = req.body;

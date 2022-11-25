@@ -1,7 +1,6 @@
 import { Request, Response } from 'express';
 import AppDataSource from '../data-source';
 import Department from "../entities/Department"
-import User from '../entities/User';
 
 class DepartmentController {
 
