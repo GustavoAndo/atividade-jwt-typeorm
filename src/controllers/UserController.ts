@@ -205,6 +205,7 @@ class UserController {
         profile: _profile,
       },
       relations: {
+        master: true,
         departments: Boolean(department)
       },
       order: {

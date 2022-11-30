@@ -19,8 +19,11 @@ export default class User {
     @Column({ nullable: false, select: false })
     password: string;
 
-    @Column({type:'enum', enum:['employee', 'manager', 'admin'], default:'employee', nullable:false})
-    profile: Profile;
+    // @Column({type:'enum', enum:['employee', 'manager', 'admin'], default:'employee', nullable:false})
+    // profile: Profile;
+
+    @Column({ default: 'employee', nullable: false })
+    profile: string;
 
     @ManyToOne(() => User, { onDelete: 'CASCADE', onUpdate: 'CASCADE', nullable: true })
     @JoinColumn({ 
