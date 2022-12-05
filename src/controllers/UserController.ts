@@ -18,16 +18,20 @@ class UserController {
       .getOne();
 
     if (user && user.iduser) {
-      const r = await user.compare(password);
-      if (r) {
-        const token = await generateToken({ id: user.iduser, perfil: user.profile })
-        return res.json({
-          name: user.name,
-          profile: user.profile,
-          token
-        })
+      try {
+        const r = await user.compare(password);
+        if (r) {
+          const token = await generateToken({ id: user.iduser, perfil: user.profile })
+          return res.json({
+            name: user.name,
+            profile: user.profile,
+            token
+          })
+        }
+        return res.json({ error: "Dados de login não conferem" });
+      } catch {
+        return res.json({ error: "Insira a senha" });
       }
-      return res.json({ error: "Dados de login não conferem" });
     }
     else {
       return res.json({ error: "Usuário não localizado" });

@@ -6,7 +6,7 @@ import user from "./user";
 
 const routes = Router();
 
-routes.use('/login', UserController.login)
+routes.post('/login', UserController.login)
 routes.use('/user', authorization, user);
 routes.use('/department', authorization, department);
 routes.use((req: Request, res: Response) => res.json({ error: "Requisição desconhecida" }));
